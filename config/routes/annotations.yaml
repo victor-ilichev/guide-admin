@@ -2,6 +2,12 @@ controllers:
     resource: ../../src/Controller/
     type: annotation
 
+api_v1_excursions:
+    prefix: api/v1
+    resource: ../../src/ApiV1/Excursion/Controller/
+    type: annotation
+    name_prefix: api.v1.
+
 kernel:
     resource: ../../src/Kernel.php
     type: annotation
