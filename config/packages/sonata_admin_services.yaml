@@ -1,0 +1,12 @@
+services:
+    sonata_service.admin.excursion:
+            class: App\Admin\ExcursionAdmin
+            arguments: [ ~, App\Entity\Excursion, ~ ]
+            tags:
+                - { name: sonata.admin, manager_type: orm, label: Excursion }
+
+    sonata_service.admin.track:
+        class: App\Admin\TrackAdmin
+        arguments: [ ~, App\Entity\Track, ~ ]
+        tags:
+            - { name: sonata.admin, manager_type: orm, label: Track }
