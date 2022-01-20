@@ -5,6 +5,18 @@ services:
             tags:
                 - { name: sonata.admin, manager_type: orm, label: Excursion }
 
+    sonata_service.admin.chapter:
+        class: App\Admin\ChapterAdmin
+        arguments: [ ~, App\Entity\Chapter, ~ ]
+        tags:
+            - { name: sonata.admin, manager_type: orm, label: Chapter }
+
+    sonata_service.admin.play_list:
+        class: App\Admin\PlayListAdmin
+        arguments: [ ~, App\Entity\PlayList, ~ ]
+        tags:
+            - { name: sonata.admin, manager_type: orm, label: PlayList }
+
     sonata_service.admin.track:
         class: App\Admin\TrackAdmin
         arguments: [ ~, App\Entity\Track, ~ ]
