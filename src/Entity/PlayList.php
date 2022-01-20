@@ -1,19 +1,22 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Entity;
 
-use App\Repository\ExcursionRepository;
+use App\Repository\PlayListRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use DateTimeImmutable;
 
 /**
- * @ORM\Entity(repositoryClass=ExcursionRepository::class)
+ * @ORM\Entity(repositoryClass=PlayListRepository::class)
+ * @ORM\Table(name="play_list",
+ *     indexes={
+ *          @ORM\Index(name="idx_chapter_id", columns={"chapter_id"})
+ *     }
+ * )
  */
-class Excursion
+class PlayList
 {
     /**
      * @ORM\Id
@@ -28,9 +31,14 @@ class Excursion
     private $title;
 
     /**
-     * @ORM\OneToMany(targetEntity=Chapter::class, mappedBy="excursion")
+     * @ORM\ManyToOne(targetEntity=Chapter::class, inversedBy="playLists")
      */
-    private $chapters;
+    private $chapter;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Track::class, mappedBy="playList", cascade={"persist"})
+     */
+    private $tracks;
 
     /**
      * @ORM\Column(type="datetime_immutable")
@@ -44,7 +52,7 @@ class Excursion
 
     public function __construct()
     {
-        $this->chapters = new ArrayCollection();
+        $this->tracks = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -64,30 +72,42 @@ class Excursion
         return $this;
     }
 
-    /**
-     * @return Collection|Chapter[]
-     */
-    public function getChapters(): Collection
+    public function getChapter(): ?Chapter
     {
-        return $this->chapters;
+        return $this->chapter;
     }
 
-    public function addChapter(Chapter $chapter): self
+    public function setChapter(?Chapter $chapter): self
     {
-        if (!$this->chapters->contains($chapter)) {
-            $this->chapters[] = $chapter;
-            $chapter->setExcursion($this);
+        $this->chapter = $chapter;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Track[]
+     */
+    public function getTracks(): Collection
+    {
+        return $this->tracks;
+    }
+
+    public function addTrack(Track $track): self
+    {
+        if (!$this->tracks->contains($track)) {
+            $this->tracks[] = $track;
+            $track->setPlayList($this);
         }
 
         return $this;
     }
 
-    public function removeChapter(Chapter $chapter): self
+    public function removeTrack(Track $track): self
     {
-        if ($this->chapters->removeElement($chapter)) {
+        if ($this->tracks->removeElement($track)) {
             // set the owning side to null (unless already changed)
-            if ($chapter->getExcursion() === $this) {
-                $chapter->setExcursion(null);
+            if ($track->getPlayList() === $this) {
+                $track->setPlayList(null);
             }
         }
 

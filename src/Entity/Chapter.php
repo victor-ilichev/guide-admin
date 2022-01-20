@@ -1,19 +1,22 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Entity;
 
-use App\Repository\ExcursionRepository;
+use App\Repository\ChapterRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use DateTimeImmutable;
 
 /**
- * @ORM\Entity(repositoryClass=ExcursionRepository::class)
+ * @ORM\Entity(repositoryClass=ChapterRepository::class)
+ * @ORM\Table(name="chapter",
+ *     indexes={
+ *          @ORM\Index(name="idx_excursion_id", columns={"excursion_id"})
+ *     }
+ * )
  */
-class Excursion
+class Chapter
 {
     /**
      * @ORM\Id
@@ -28,9 +31,16 @@ class Excursion
     private $title;
 
     /**
-     * @ORM\OneToMany(targetEntity=Chapter::class, mappedBy="excursion")
+     * @var Excursion
+     *
+     * @ORM\ManyToOne(targetEntity=Excursion::class, inversedBy="chapters")
      */
-    private $chapters;
+    private $excursion;
+
+    /**
+     * @ORM\OneToMany(targetEntity=PlayList::class, mappedBy="chapter")
+     */
+    private $playLists;
 
     /**
      * @ORM\Column(type="datetime_immutable")
@@ -44,7 +54,7 @@ class Excursion
 
     public function __construct()
     {
-        $this->chapters = new ArrayCollection();
+        $this->playLists = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -64,30 +74,40 @@ class Excursion
         return $this;
     }
 
-    /**
-     * @return Collection|Chapter[]
-     */
-    public function getChapters(): Collection
+    public function getExcursion(): Excursion
     {
-        return $this->chapters;
+        return $this->excursion;
     }
 
-    public function addChapter(Chapter $chapter): self
+    public function setExcursion(Excursion $excursion): void
     {
-        if (!$this->chapters->contains($chapter)) {
-            $this->chapters[] = $chapter;
-            $chapter->setExcursion($this);
+        $this->excursion = $excursion;
+    }
+
+    /**
+     * @return Collection|PlayList[]
+     */
+    public function getPlayLists(): Collection
+    {
+        return $this->playLists;
+    }
+
+    public function addPlayList(PlayList $playList): self
+    {
+        if (!$this->playLists->contains($playList)) {
+            $this->playLists[] = $playList;
+            $playList->setChapter($this);
         }
 
         return $this;
     }
 
-    public function removeChapter(Chapter $chapter): self
+    public function removePlayList(PlayList $playList): self
     {
-        if ($this->chapters->removeElement($chapter)) {
+        if ($this->playLists->removeElement($playList)) {
             // set the owning side to null (unless already changed)
-            if ($chapter->getExcursion() === $this) {
-                $chapter->setExcursion(null);
+            if ($playList->getChapter() === $this) {
+                $playList->setChapter(null);
             }
         }
 

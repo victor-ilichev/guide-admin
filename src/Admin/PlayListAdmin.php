@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace App\Admin;
 
-use App\Entity\Excursion;
 use App\Entity\Track;
-use Sonata\AdminBundle\Admin\AbstractAdmin;
-use Sonata\AdminBundle\Datagrid\ListMapper;
-use Sonata\AdminBundle\Datagrid\DatagridMapper;
-use Sonata\AdminBundle\Form\FormMapper;
-use Sonata\AdminBundle\Show\ShowMapper;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use DateTimeImmutable;
+use Doctrine\ORM\EntityRepository;
+use Sonata\AdminBundle\Admin\AbstractAdmin;
+use Sonata\AdminBundle\Datagrid\DatagridMapper;
+use Sonata\AdminBundle\Datagrid\ListMapper;
+use Sonata\AdminBundle\Form\FormMapper;
+use Sonata\AdminBundle\Form\Type\ModelListType;
+use Sonata\AdminBundle\Show\ShowMapper;
+use Sonata\Form\Type\CollectionType;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-final class TrackAdmin extends AbstractAdmin
+final class PlayListAdmin extends AbstractAdmin
 {
     protected function prePersist(object $object): void
     {
@@ -27,11 +29,29 @@ final class TrackAdmin extends AbstractAdmin
     {
         $form
             ->add('title', TextType::class)
-            ->add('sort', NumberType::class)
-//            ->add('excursion', EntityType::class, [
-//                'class' => Excursion::class,
-//                'choice_label' => 'title',
-//            ])
+            ->add(
+                'tracks', EntityType::class, [
+                    'class' => Track::class,
+                    'query_builder' => function (EntityRepository $er) {
+                        return $er->createQueryBuilder('t')
+                            ->orderBy('t.title', 'ASC');
+                    },
+                    'choice_label' => 'title',
+                    'multiple' => true,
+                ]
+            )
+//            ->add(
+//                'tracks',
+//                CollectionType::class, [
+//                    'by_reference' => false,
+//                ],
+//                [
+//                    'edit' => 'disable',
+//                    'inline' => 'table',
+//                    'sortable' => 'position',
+//                    'limit' => 3,
+//                ]
+//            )
         ;
     }
 
@@ -44,7 +64,7 @@ final class TrackAdmin extends AbstractAdmin
     {
         $list
             ->addIdentifier('title')
-            ->add('sort')
+            ->add('createdAt')
             ->add('_action', 'actions', [
                 'actions' => [
                     'edit' => [],
@@ -59,9 +79,3 @@ final class TrackAdmin extends AbstractAdmin
         $show->add('title');
     }
 }
-//создаем свой тип поля для админки
-//для сохранения файлов
-//сохраняем один файл для трэка
-//и ставим тип файла, например видео или аудио
-//в мостпартнере сделано с этим
-//https://github.com/dustin10/VichUploaderBundle
