@@ -36,7 +36,7 @@ class PlayList
     private $chapter;
 
     /**
-     * @ORM\OneToMany(targetEntity=Track::class, mappedBy="playList", cascade={"persist"})
+     * @ORM\ManyToMany(targetEntity=Track::class, inversedBy="playLists")
      */
     private $tracks;
 
@@ -96,7 +96,6 @@ class PlayList
     {
         if (!$this->tracks->contains($track)) {
             $this->tracks[] = $track;
-            $track->setPlayList($this);
         }
 
         return $this;
@@ -104,12 +103,7 @@ class PlayList
 
     public function removeTrack(Track $track): self
     {
-        if ($this->tracks->removeElement($track)) {
-            // set the owning side to null (unless already changed)
-            if ($track->getPlayList() === $this) {
-                $track->setPlayList(null);
-            }
-        }
+        $this->tracks->removeElement($track);
 
         return $this;
     }
@@ -136,5 +130,10 @@ class PlayList
         $this->updatedAt = $updatedAt;
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return 'PlayList [' . $this->getTitle() . ']';
     }
 }

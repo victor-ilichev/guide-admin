@@ -3,15 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\TrackRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use DateTimeImmutable;
 
 /**
  * @ORM\Entity(repositoryClass=TrackRepository::class)
- * @ORM\Table(name="track",
- *     indexes={
- *          @ORM\Index(name="idx_play_list_id", columns={"play_list_id"})
- *     }
+ * @ORM\Table(name="track"
  * )
  */
 class Track
@@ -34,9 +33,9 @@ class Track
     private $sort;
 
     /**
-     * @ORM\ManyToOne(targetEntity=PlayList::class, inversedBy="tracks")
+     * @ORM\ManyToMany(targetEntity=PlayList::class, mappedBy="tracks")
      */
-    private $playList;
+    private $playLists;
 
     /**
      * @ORM\Column(type="datetime_immutable")
@@ -47,6 +46,11 @@ class Track
      * @ORM\Column(type="datetime_immutable", nullable=true)
      */
     private $updatedAt;
+
+    public function __construct()
+    {
+        $this->playLists = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -77,18 +81,6 @@ class Track
         return $this;
     }
 
-    public function getPlayList(): ?PlayList
-    {
-        return $this->playList;
-    }
-
-    public function setPlayList(?PlayList $playList): self
-    {
-        $this->playList = $playList;
-
-        return $this;
-    }
-
     public function getCreatedAt(): ?DateTimeImmutable
     {
         return $this->createdAt;
@@ -111,5 +103,37 @@ class Track
         $this->updatedAt = $updatedAt;
 
         return $this;
+    }
+
+    /**
+     * @return Collection|PlayList[]
+     */
+    public function getPlayList(): Collection
+    {
+        return $this->playLists;
+    }
+
+    public function addPlayList(PlayList $playList): self
+    {
+        if (!$this->playLists->contains($playList)) {
+            $this->playLists[] = $playList;
+            $playList->addTrack($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlayList(PlayList $playList): self
+    {
+        if ($this->playLists->removeElement($playList)) {
+            $playList->removeTrack($this);
+        }
+
+        return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->getTitle();
     }
 }

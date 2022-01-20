@@ -11,6 +11,7 @@ use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Form\FormMapper;
+use Sonata\AdminBundle\Form\Type\ModelAutocompleteType;
 use Sonata\AdminBundle\Form\Type\ModelListType;
 use Sonata\AdminBundle\Show\ShowMapper;
 use Sonata\Form\Type\CollectionType;
@@ -30,13 +31,14 @@ final class PlayListAdmin extends AbstractAdmin
         $form
             ->add('title', TextType::class)
             ->add(
-                'tracks', EntityType::class, [
+                'tracks', ModelAutocompleteType::class, [
                     'class' => Track::class,
-                    'query_builder' => function (EntityRepository $er) {
-                        return $er->createQueryBuilder('t')
-                            ->orderBy('t.title', 'ASC');
-                    },
-                    'choice_label' => 'title',
+//                    'query_builder' => function (EntityRepository $er) {
+//                        return $er->createQueryBuilder('t')
+//                            ->orderBy('t.title', 'ASC');
+//                    },
+//                    'choice_label' => 'title',
+                    'property' => 'title',
                     'multiple' => true,
                 ]
             )
