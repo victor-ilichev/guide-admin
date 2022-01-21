@@ -33,9 +33,9 @@ class Track
     private $sort;
 
     /**
-     * @ORM\ManyToMany(targetEntity=PlayList::class, mappedBy="tracks")
+     * @ORM\OneToMany(targetEntity=TrackSort::class, mappedBy="track")
      */
-    private $playLists;
+    private $trackSorts;
 
     /**
      * @ORM\Column(type="datetime_immutable")
@@ -49,7 +49,7 @@ class Track
 
     public function __construct()
     {
-        $this->playLists = new ArrayCollection();
+        $this->trackSorts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -106,31 +106,39 @@ class Track
     }
 
     /**
-     * @return Collection|PlayList[]
+     * @return Collection|TrackSort[]
      */
-    public function getPlayList(): Collection
+    public function getTrackSorts(): Collection
     {
-        return $this->playLists;
+        return $this->trackSorts;
     }
 
-    public function addPlayList(PlayList $playList): self
+    public function setTrackSorts(ArrayCollection $trackSorts): void
     {
-        if (!$this->playLists->contains($playList)) {
-            $this->playLists[] = $playList;
-            $playList->addTrack($this);
-        }
-
-        return $this;
+        $this->trackSorts = $trackSorts;
     }
 
-    public function removePlayList(PlayList $playList): self
-    {
-        if ($this->playLists->removeElement($playList)) {
-            $playList->removeTrack($this);
-        }
-
-        return $this;
-    }
+//    public function addTrackSort(TrackSort $trackSort): self
+//    {
+//        if (!$this->trackSorts->contains($trackSort)) {
+//            $this->trackSorts[] = $trackSort;
+//            $trackSort->setTrack($this);
+//        }
+//
+//        return $this;
+//    }
+//
+//    public function removeTrackSort(TrackSort $trackSort): self
+//    {
+//        if ($this->trackSorts->removeElement($trackSort)) {
+//            // set the owning side to null (unless already changed)
+//            if ($trackSort->getTrack() === $this) {
+//                $trackSort->setTrack(null);
+//            }
+//        }
+//
+//        return $this;
+//    }
 
     public function __toString(): string
     {

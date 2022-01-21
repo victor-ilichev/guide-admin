@@ -22,3 +22,9 @@ services:
         arguments: [ ~, App\Entity\Track, ~ ]
         tags:
             - { name: sonata.admin, manager_type: orm, label: Track }
+
+    sonata_service.admin.track_sort:
+        class: App\Admin\TrackSortAdmin
+        arguments: [ ~, App\Entity\TrackSort, ~ ]
+        tags:
+            - { name: sonata.admin, manager_type: orm, label: TrackSort }
