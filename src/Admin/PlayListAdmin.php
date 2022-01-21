@@ -44,50 +44,61 @@ final class PlayListAdmin extends AbstractAdmin
 //                    'sortable' => true,
 //                ]
 //            )
-//            ->add(
-//                'trackSorts', ModelAutocompleteType::class, [
-//                    'class' => Track::class,
-////                    'query' => $this->getModelManager()->createQuery(Track::class),
-////                    'query_builder' => function (EntityRepository $er) {
-////                        return $er->createQueryBuilder('t')
-////                            ->orderBy('t.title', 'ASC');
-////                    },
-////                    'choice_label' => 'title',
-//                    'property' => 'title',
-//                    'multiple' => true,
-////                    'callback' => static function (AdminInterface $admin, string $property, $searchText): void {
-////                    // SELECT o FROM App\Entity\TrackSort o INNER JOIN o.track t WHERE t.title = :title AND o.title LIKE :title_0 ORDER BY o.id ASC
-////                        $datagrid = $admin->getDatagrid();
-////                        $query = $datagrid->getQuery();
-////
-////                        $r = $admin->getRequest();
-////
-//////                        $query->select('p')
-//////                            ->from(Track::class, 'p')
-//////                            ->where('t.title LIKE :title')
-//////                            ->setParameter('title', $admin->getRequest()->get('q'))
-//////                        ;
-//////                        $query->innerJoin($query->getRootAlias().'.job','j')
-//////                            ->innerJoin('j.company','c')
-//////                            ->where('c.id = :company')
-//////                            ->setParameter('company', $user->getCompany()->getId());
-////                        $query->innerJoin($query->getRootAlias() . '.track', 't')
-////                            ->where('t.title LIKE :title')
-////                            ->setParameter('title', $admin->getRequest()->get('q'))
-////                        ;
-//////                        $query
-//////                            ->andWhere($query->getRootAlias() . '.track.title=:barValue')
-//////                            ->setParameter('barValue', $admin->getRequest()->get('q'))
-//////                        ;
-////                        // SELECT o FROM App\Entity\TrackSort o INNER JOIN o.track t WHERE t.title = :title ORDER BY o.id ASC
-////                        // закоментил строку ниже
-////                        // $datagrid->setValue($property, null, $searchText);
-////                    },
-////                    'to_string_callback' => function($entity, $property) {
-////                        return $entity->getTitle();
-////                    },
-//                ]
-//            )
+            ->add(
+                'trackSorts', ModelAutocompleteType::class, [
+                    'class' => Track::class,
+//                    'query' => $this->getModelManager()->createQuery(Track::class),
+//                    'query_builder' => function (EntityRepository $er) {
+//                        return $er->createQueryBuilder('t')
+//                            ->orderBy('t.title', 'ASC');
+//                    },
+//                    'choice_label' => 'title',
+                    'property' => 'title',
+                    'multiple' => true,
+                    'callback' => static function (AdminInterface $admin, string $property, $searchText): void {
+                    // SELECT o FROM App\Entity\TrackSort o INNER JOIN o.track t WHERE t.title = :title AND o.title LIKE :title_0 ORDER BY o.id ASC
+                        $datagrid = $admin->getDatagrid();
+                        $query = $datagrid->getQuery();
+
+//                        $query = $this->getModelManager()->createQuery(Track::class);
+//                        $queryBuilder->from('Post', 'p');
+//
+//                        $proxyQuery = new ProxyQuery($queryBuilder);
+//                        $proxyQuery->leftJoin('p.tags', 't');
+//                        $proxyQuery->setSortBy('name');
+//                        $proxyQuery->setMaxResults(10);
+//
+//                        $results = $proxyQuery->execute();
+                        $query->resetDQLPart('select');
+                        $query->resetDQLPart('from');
+                        $r = $admin->getRequest();
+
+                        $query->select('p')
+                            ->from(Track::class, 'p')
+                            ->where('p.title LIKE :title')
+                            ->setParameter('title', '%' . $searchText . '%')
+                        ;
+//                        $query->innerJoin($query->getRootAlias().'.job','j')
+//                            ->innerJoin('j.company','c')
+//                            ->where('c.id = :company')
+//                            ->setParameter('company', $user->getCompany()->getId());
+//                        $query->innerJoin($query->getRootAlias() . '.track', 't')
+//                            ->where('t.title LIKE :title')
+//                            ->setParameter('title', $admin->getRequest()->get('q'))
+//                        ;
+//                        $query
+//                            ->andWhere($query->getRootAlias() . '.track.title=:barValue')
+//                            ->setParameter('barValue', $admin->getRequest()->get('q'))
+//                        ;
+                        // SELECT o FROM App\Entity\TrackSort o INNER JOIN o.track t WHERE t.title = :title ORDER BY o.id ASC
+                        // закоментил строку ниже
+                        // $datagrid->setValue($property, null, $searchText);
+                    },
+//                    'to_string_callback' => function($entity, $property) {
+//                        return $entity->getTitle();
+//                    },
+                ]
+            )
 //            ->add(
 //                'tracks',
 //                CollectionType::class, [
@@ -109,18 +120,18 @@ final class PlayListAdmin extends AbstractAdmin
 //                'by_reference' => false,
 //                'sortable'     => true,
 //            ])
-            ->add('trackSorts', ModelAutocompleteType::class, [
-                'label'        => 'User\'s expectations',
-                'required'     => false,
-                'multiple'     => true,
-                'by_reference' => false,
-                'property' => 'title',
-            ])
+//            ->add('trackSorts', ModelAutocompleteType::class, [
+//                'label'        => 'User\'s expectations',
+//                'required'     => false,
+//                'multiple'     => true,
+//                'by_reference' => false,
+//                'property' => 'title',
+//            ])
         ;
 
-//        $form
-//            ->get('trackSorts')
-//            ->addModelTransformer(new TrackSortDataTransformer($this->getSubject(), $this->getModelManager()));
+        $form
+            ->get('trackSorts')
+            ->addModelTransformer(new TrackSortDataTransformer($this->getSubject(), $this->getModelManager()));
 
 //        $result = $em->getRepository("Orders")->createQueryBuilder('o')
 //            ->where('o.OrderEmail = :email')

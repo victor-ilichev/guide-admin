@@ -36,7 +36,7 @@ class PlayList
     private $chapter;
 
     /**
-     * @ORM\OneToMany(targetEntity=TrackSort::class, mappedBy="playList", orphanRemoval="true")
+     * @ORM\OneToMany(targetEntity=TrackSort::class, mappedBy="playList", orphanRemoval="true", cascade={"persist"})
      */
     private $trackSorts;
 

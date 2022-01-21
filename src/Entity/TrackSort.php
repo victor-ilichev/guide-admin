@@ -18,13 +18,13 @@ class TrackSort
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Track::class, inversedBy="trackSorts")
+     * @ORM\ManyToOne(targetEntity=Track::class, inversedBy="trackSorts", cascade={"persist"})
      * @ORM\JoinColumn(nullable=false)
      */
     private $track;
 
     /**
-     * @ORM\ManyToOne(targetEntity=PlayList::class, inversedBy="trackSorts")
+     * @ORM\ManyToOne(targetEntity=PlayList::class, inversedBy="trackSorts", cascade={"persist"})
      * @ORM\JoinColumn(nullable=false)
      */
     private $playList;

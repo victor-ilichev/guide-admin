@@ -33,7 +33,7 @@ class Track
     private $sort;
 
     /**
-     * @ORM\OneToMany(targetEntity=TrackSort::class, mappedBy="track")
+     * @ORM\OneToMany(targetEntity=TrackSort::class, mappedBy="track", cascade={"persist"})
      */
     private $trackSorts;
 

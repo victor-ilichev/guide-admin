@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Admin;
 
 use App\Entity\PlayList;
+use App\Entity\Track;
+use App\Entity\TrackSort;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Sonata\DoctrineORMAdminBundle\Model\ModelManager;
 use Symfony\Component\Form\DataTransformerInterface;
@@ -32,9 +35,9 @@ class TrackSortDataTransformer implements DataTransformerInterface
         if (!is_null($value)) {
             $results = [];
 
-            /** @var UserHasExpectations $userHasExpectations */
+            /** @var TrackSort $userHasExpectations */
             foreach ($value as $userHasExpectations) {
-                $results[] = $userHasExpectations->getExpectation();
+                $results[] = $userHasExpectations->getTrack();
             }
 
             return $results;
@@ -48,30 +51,33 @@ class TrackSortDataTransformer implements DataTransformerInterface
         $results  = new ArrayCollection();
         $position = 0;
 
-        /** @var Expectation $expectation */
+        /** @var Track $expectation */
         foreach ($value as $expectation) {
-            $userHasExpectations = $this->create();
-            $userHasExpectations->setExpectation($expectation);
-            $userHasExpectations->setPosition($position++);
+            $trackSort = new TrackSort();
+            $trackSort->setCreatedAt(new DateTimeImmutable());
+            $trackSort->setTrack($expectation);
+            $trackSort->setSort($position++);
 
-            $results->add($userHasExpectations);
+            $results->add($trackSort);
         }
 
-        // Remove Old values
-        $qb = $this->modelManager->getEntityManager()->createQueryBuilder();
-        $expr = $this->modelManager->getEntityManager()->getExpressionBuilder();
+        if (null !== $this->playList->getId()) {
+            // Remove Old values
+            $qb = $this->modelManager->getEntityManager(TrackSort::class)->createQueryBuilder();
+            $expr = $this->modelManager->getEntityManager(TrackSort::class)->getExpressionBuilder();
 
-        $userHasExpectationsToRemove = $qb->select('entity')
-            ->from($this->getClass(), 'entity')
-            ->where($expr->eq('entity.user', $this->playList->getId()))
-            ->getQuery()
-            ->getResult();
+            $trackSortToRemove = $qb->select('ts')
+                ->from(TrackSort::class, 'ts')
+                ->where($expr->eq('ts.playList', $this->playList->getId()))
+                ->getQuery()
+                ->getResult();
 
-        foreach ($userHasExpectationsToRemove as $userHasExpectations) {
-            $this->modelManager->delete($userHasExpectations, false);
+            foreach ($trackSortToRemove as $trackSort) {
+                $this->modelManager->delete($trackSort);
+            }
+
+            $this->modelManager->getEntityManager(TrackSort::class)->flush();
         }
-
-        $this->modelManager->getEntityManager()->flush();
 
         return $results;
     }
