@@ -30,4 +30,16 @@ services:
         class: App\Admin\TrackSortAdmin
         arguments: [ ~, App\Entity\TrackSort, ~ ]
         tags:
-            - { name: sonata.admin, manager_type: orm, label: TrackSort }
+            - { name: sonata.admin, manager_type: orm, label: TrackSort, show_in_dashboard: false }
+
+    sonata_service.admin.excursion_chapter_sort:
+        class: App\Admin\ExcursionChapterSortAdmin
+        arguments: [ ~, App\Entity\ExcursionChapterSort, ~ ]
+        tags:
+            - { name: sonata.admin, manager_type: orm, label: ExcursionChapterSort, show_in_dashboard: false }
+
+    sonata_service.admin.chapter_play_list_sort:
+        class: App\Admin\ChapterPlayListSortAdmin
+        arguments: [ ~, App\Entity\ChapterPlayListSort, ~ ]
+        tags:
+            - { name: sonata.admin, manager_type: orm, label: ExcursionChapterSort, show_in_dashboard: false }

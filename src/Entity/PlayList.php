@@ -31,9 +31,9 @@ class PlayList
     private $title;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Chapter::class, inversedBy="playLists")
+     * @ORM\OneToMany(targetEntity=ChapterPlayListSort::class, mappedBy="playList", orphanRemoval="true", cascade={"persist"})
      */
-    private $chapter;
+    private $chapterSorts;
 
     /**
      * @ORM\OneToMany(targetEntity=TrackSort::class, mappedBy="playList", orphanRemoval="true", cascade={"persist"})
@@ -72,14 +72,28 @@ class PlayList
         return $this;
     }
 
-    public function getChapter(): ?Chapter
+    public function getChapterSorts(): ?ChapterPlayListSort
     {
-        return $this->chapter;
+        return $this->chapterSorts;
     }
 
-    public function setChapter(?Chapter $chapter): self
+    public function setChapterSorts(?ChapterPlayListSort $playListSort): self
     {
-        $this->chapter = $chapter;
+        $this->chapterSorts = new ArrayCollection;
+
+        foreach ($playListSort as $ts) {
+            $this->addChapterSorts($ts);
+        }
+
+        return $this;
+    }
+
+    public function addChapterSorts(ChapterPlayListSort $playListSort): self
+    {
+        if (!$this->chapterSorts->contains($playListSort)) {
+            $this->chapterSorts[] = $playListSort;
+            $playListSort->setPlayList($this);
+        }
 
         return $this;
     }

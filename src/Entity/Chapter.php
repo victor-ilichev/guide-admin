@@ -10,11 +10,7 @@ use DateTimeImmutable;
 
 /**
  * @ORM\Entity(repositoryClass=ChapterRepository::class)
- * @ORM\Table(name="chapter",
- *     indexes={
- *          @ORM\Index(name="idx_excursion_id", columns={"excursion_id"})
- *     }
- * )
+ * @ORM\Table(name="chapter")
  */
 class Chapter
 {
@@ -31,16 +27,14 @@ class Chapter
     private $title;
 
     /**
-     * @var Excursion
-     *
-     * @ORM\ManyToOne(targetEntity=Excursion::class, inversedBy="chapters")
+     * @ORM\OneToMany(targetEntity=ExcursionChapterSort::class, mappedBy="chapter", cascade={"persist"})
      */
-    private $excursion;
+    private $sorts;
 
     /**
-     * @ORM\OneToMany(targetEntity=PlayList::class, mappedBy="chapter")
+     * @ORM\OneToMany(targetEntity=ChapterPlayListSort::class, mappedBy="chapterPl", cascade={"persist"})
      */
-    private $playLists;
+    private $playListSorts;
 
     /**
      * @ORM\Column(type="datetime_immutable")
@@ -54,7 +48,8 @@ class Chapter
 
     public function __construct()
     {
-        $this->playLists = new ArrayCollection();
+        $this->sorts = new ArrayCollection();
+        $this->playListSorts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -74,41 +69,61 @@ class Chapter
         return $this;
     }
 
-    public function getExcursion(): Excursion
+    /**
+     * @return Collection|ExcursionChapterSort[]
+     */
+    public function getSorts(): Collection
     {
-        return $this->excursion;
-    }
-
-    public function setExcursion(Excursion $excursion): void
-    {
-        $this->excursion = $excursion;
+        return $this->sorts;
     }
 
     /**
-     * @return Collection|PlayList[]
+     * @param ArrayCollection $sorts
      */
-    public function getPlayLists(): Collection
+    public function setSorts(ArrayCollection $sorts): void
     {
-        return $this->playLists;
+        $this->sorts = new ArrayCollection;
+
+        foreach ($sorts as $ts) {
+            $this->addSort($ts);
+        }
     }
 
-    public function addPlayList(PlayList $playList): self
+    public function addSort(ExcursionChapterSort $trackSort): self
     {
-        if (!$this->playLists->contains($playList)) {
-            $this->playLists[] = $playList;
-            $playList->setChapter($this);
+        if (!$this->sorts->contains($trackSort)) {
+            $this->sorts[] = $trackSort;
+            $trackSort->setChapter($this);
         }
 
         return $this;
     }
 
-    public function removePlayList(PlayList $playList): self
+    /**
+     * @return Collection|ExcursionChapterSort[]
+     */
+    public function getPlayListSorts(): Collection
     {
-        if ($this->playLists->removeElement($playList)) {
-            // set the owning side to null (unless already changed)
-            if ($playList->getChapter() === $this) {
-                $playList->setChapter(null);
-            }
+        return $this->playListSorts;
+    }
+
+    /**
+     * @param ArrayCollection $sorts
+     */
+    public function setPlayListSorts(ArrayCollection $sorts): void
+    {
+        $this->playListSorts = new ArrayCollection;
+
+        foreach ($sorts as $ts) {
+            $this->addPlayListSort($ts);
+        }
+    }
+
+    public function addPlayListSort(ChapterPlayListSort $trackSort): self
+    {
+        if (!$this->playListSorts->contains($trackSort)) {
+            $this->playListSorts[] = $trackSort;
+            $trackSort->setChapter($this);
         }
 
         return $this;
@@ -136,5 +151,10 @@ class Chapter
         $this->updatedAt = $updatedAt;
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return 'Chapter [' . $this->getTitle() . ']';
     }
 }

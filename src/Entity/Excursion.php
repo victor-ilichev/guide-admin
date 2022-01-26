@@ -28,9 +28,9 @@ class Excursion
     private $title;
 
     /**
-     * @ORM\OneToMany(targetEntity=Chapter::class, mappedBy="excursion")
+     * @ORM\OneToMany(targetEntity=ExcursionChapterSort::class, mappedBy="excursion", orphanRemoval="true", cascade={"persist"})
      */
-    private $chapters;
+    private $sorts;
 
     /**
      * @ORM\Column(type="datetime_immutable")
@@ -44,7 +44,7 @@ class Excursion
 
     public function __construct()
     {
-        $this->chapters = new ArrayCollection();
+        $this->sorts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -65,30 +65,30 @@ class Excursion
     }
 
     /**
-     * @return Collection|Chapter[]
+     * @return Collection|ExcursionChapterSort[]
      */
-    public function getChapters(): Collection
+    public function getSorts(): Collection
     {
-        return $this->chapters;
+        return $this->sorts;
     }
 
-    public function addChapter(Chapter $chapter): self
+    /**
+     * @param ArrayCollection $sorts
+     */
+    public function setSorts(ArrayCollection $sorts): void
     {
-        if (!$this->chapters->contains($chapter)) {
-            $this->chapters[] = $chapter;
-            $chapter->setExcursion($this);
+        $this->sorts = new ArrayCollection;
+
+        foreach ($sorts as $ts) {
+            $this->addSort($ts);
         }
-
-        return $this;
     }
 
-    public function removeChapter(Chapter $chapter): self
+    public function addSort(ExcursionChapterSort $trackSort): self
     {
-        if ($this->chapters->removeElement($chapter)) {
-            // set the owning side to null (unless already changed)
-            if ($chapter->getExcursion() === $this) {
-                $chapter->setExcursion(null);
-            }
+        if (!$this->sorts->contains($trackSort)) {
+            $this->sorts[] = $trackSort;
+            $trackSort->setExcursion($this);
         }
 
         return $this;
@@ -116,5 +116,10 @@ class Excursion
         $this->updatedAt = $updatedAt;
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return 'Excursion [' . $this->getTitle() . ']';
     }
 }
