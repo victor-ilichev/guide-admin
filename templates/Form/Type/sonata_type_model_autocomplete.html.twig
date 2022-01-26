@@ -1,0 +1,183 @@
+{% include '@SonataAdmin/Form/Type/sonata_type_model_autocomplete.html.twig' %}
+
+{% block script %}
+
+<style>
+    /*ul.main {*/
+    /*    overflow: hidden;*/
+    /*    width: 600px;*/
+    /*    height: 500px;*/
+    /*    list-style: none;*/
+    /*    background-color: #6db9a7;*/
+    /*}*/
+
+
+    /*li.select2-selection__choice {*/
+    /*    width: 100px;*/
+    /*    height: 100px;*/
+        /*background-color: gray;*/
+        /*float: left;*/
+        /*margin-right: 10px;*/
+        /*margin-bottom: 10px;*/
+        /*padding: 10px;*/
+    /*}*/
+
+    li.select2-selection__choice .fly {
+        transform: rotate(20deg);
+    }
+
+</style>
+
+<script type="application/javascript">
+    document.addEventListener('DOMContentLoaded', (event) => {
+        let mainUl = document.querySelector('ul.select2-selection__rendered');
+        const hiddenWrap = document.getElementById('{{ id }}_hidden_inputs_wrap');
+        var autocompleteInput = $('#{{ id }}_autocomplete_input');
+        var items;
+
+        autocompleteInput.on("select2:open", function (e) { console.log("select2:open", e); });
+        autocompleteInput.on("select2:close", function (e) { console.log("select2:close", e); initSelection(); });
+        autocompleteInput.on("select2:select", function (e) { console.log("select2:select", e); });
+        autocompleteInput.on("select2:unselect", function (e) { console.log("select2:unselect", e); });
+        autocompleteInput.on("select2:clear", function (e) { console.log("select2:clear", e); });
+
+        autocompleteInput.on('change.select2', function(params) {
+            // console.log('selection:update', autocompleteInput.select2('data'));
+            // added or deleted option
+            // mainUl = document.querySelector('ul.select2-selection__rendered');
+
+            console.log('fff');
+        });
+
+        console.log(autocompleteInput.select2('data'));
+
+        const placeHolderBox = document.createElement('li');
+        placeHolderBox.style.width = '100px';
+        placeHolderBox.style.backgroundColor = '#72a4cf';
+        placeHolderBox.style.height = '22px';
+        placeHolderBox.style.margin = '5px 0 0 6px';
+        placeHolderBox.style.float = 'left';
+
+        initSelection();
+
+        function initSelection() {
+            items = mainUl.querySelectorAll('li.select2-selection__choice');
+
+            items.forEach(function(ball) {
+
+                ball.onmouseover = function(e) {
+                    console.log(e);
+                };
+
+                ball.onmousedown = function(e) {
+                    console.log('onmousedown');
+                    const coords = getCoords(ball);
+                    const shiftX = e.pageX - coords.left;
+                    const shiftY = e.pageY - coords.top;
+
+                    ball.style.position = 'absolute';
+                    ball.style.transform = 'rotate(20deg)';
+
+                    document.body.appendChild(ball);
+                    moveAt(e);
+
+                    ball.style.zIndex = 1000; // над другими элементами
+
+                    function moveAt(e) {
+                        let boxItem = getBoxUnderMouse(e.pageX, e.pageY);
+
+                        if (null != boxItem) {
+                            let rect = boxItem.getBoundingClientRect();
+                            let rectHalf = rect.width / 2;
+                            let rectMiddleX = rect.x + rectHalf;
+
+                            if (e.pageX > rect.x && e.pageX < rectMiddleX) {
+                                // left rect side
+                                mainUl.insertBefore(placeHolderBox, boxItem);
+                            } else if (e.pageX > rectMiddleX && e.pageX < rect.x + rect.width) {
+                                // right rect side
+                                let nextElement = boxItem.nextElementSibling;
+
+                                if (null != nextElement) {
+                                    mainUl.insertBefore(placeHolderBox, nextElement);
+                                } else {
+                                    mainUl.appendChild(placeHolderBox);
+                                }
+                            }
+                        }
+
+                        ball.style.left = e.pageX - shiftX + 'px';
+                        ball.style.top = e.pageY - shiftY + 'px';
+                    }
+
+                    document.onmousemove = function(e) {
+                        console.log(e);
+                        moveAt(e);
+                    };
+
+                    ball.onmouseup = function() {
+                        document.onmousemove = null;
+                        ball.onmouseup = null;
+
+                        ball.style.position = 'static';
+                        ball.style.transform = 'none';
+
+                        // mainUl.appendChild(ball);
+                        mainUl.insertBefore(ball, placeHolderBox);
+                        mainUl.removeChild(placeHolderBox);
+                    };
+
+                }
+
+                ball.ondragstart = function() {
+                    return false;
+                };
+
+                console.log(ball);
+            });
+        }
+
+        function getBoxUnderMouse(x, y) {
+            for (let i = items.length - 1; i >= 0; i--) {
+                let item = items[i];
+
+                if (item.style.position == 'absolute') {
+                    continue;
+                }
+
+                const rect = item.getBoundingClientRect();
+
+                if (
+                    x > rect.x && x < rect.x + rect.width
+                    &&
+                    y > rect.y && y < rect.y + rect.height
+                ) {
+                    return item;
+                }
+            }
+        }
+    });
+
+    function getCoords(elem) {   // кроме IE8-
+        var box = elem.getBoundingClientRect();
+
+        return {
+            top: box.top + pageYOffset,
+            left: box.left + pageXOffset
+        };
+    }
+
+    function doElsCollide(el1, el2) {
+        el1.offsetBottom = el1.offsetTop + el1.offsetHeight;
+        el1.offsetRight = el1.offsetLeft + el1.offsetWidth;
+        el2.offsetBottom = el2.offsetTop + el2.offsetHeight;
+        el2.offsetRight = el2.offsetLeft + el2.offsetWidth;
+
+        return !((el1.offsetBottom < el2.offsetTop) ||
+            (el1.offsetTop > el2.offsetBottom) ||
+            (el1.offsetRight < el2.offsetLeft) ||
+            (el1.offsetLeft > el2.offsetRight))
+    }
+
+</script>
+{% endblock %}

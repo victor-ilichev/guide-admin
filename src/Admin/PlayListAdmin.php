@@ -47,6 +47,8 @@ final class PlayListAdmin extends AbstractAdmin
             ->add(
                 'trackSorts', ModelAutocompleteType::class, [
                     'class' => Track::class,
+                    'template' => 'Form/Type/sonata_type_model_autocomplete.html.twig',
+                    'btn_add' => false,
 //                    'query' => $this->getModelManager()->createQuery(Track::class),
 //                    'query_builder' => function (EntityRepository $er) {
 //                        return $er->createQueryBuilder('t')
@@ -97,6 +99,12 @@ final class PlayListAdmin extends AbstractAdmin
 //                    'to_string_callback' => function($entity, $property) {
 //                        return $entity->getTitle();
 //                    },
+                ],
+                [
+                    'edit' => 'disable',
+                    'inline' => 'table',
+                    'sortable' => 'position',
+                    'limit' => 3,
                 ]
             )
 //            ->add(
