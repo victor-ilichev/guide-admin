@@ -1,9 +1,9 @@
 services:
     sonata_service.admin.excursion:
-            class: App\Admin\ExcursionAdmin
-            arguments: [ ~, App\Entity\Excursion, ~ ]
-            tags:
-                - { name: sonata.admin, manager_type: orm, label: Excursion }
+        class: App\Admin\ExcursionAdmin
+        arguments: [ ~, App\Entity\Excursion, ~ ]
+        tags:
+            - { name: sonata.admin, manager_type: orm, label: Excursion }
 
     sonata_service.admin.chapter:
         class: App\Admin\ChapterAdmin
@@ -22,7 +22,10 @@ services:
         arguments: [ ~, App\Entity\Track, ~ ]
         tags:
             - { name: sonata.admin, manager_type: orm, label: Track }
+        calls:
+            - [ setFileManager, [ '@app.service.local_file_manager' ]]
 
+    # без этого сервиса не станет работать PlayListAdmin trackSorts
     sonata_service.admin.track_sort:
         class: App\Admin\TrackSortAdmin
         arguments: [ ~, App\Entity\TrackSort, ~ ]

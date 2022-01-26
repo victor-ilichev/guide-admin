@@ -28,9 +28,9 @@ class Track
     private $title;
 
     /**
-     * @ORM\Column(type="smallint")
+     * @ORM\Column(type="string", length=255)
      */
-    private $sort;
+    private $fileName;
 
     /**
      * @ORM\OneToMany(targetEntity=TrackSort::class, mappedBy="track", cascade={"persist"})
@@ -69,16 +69,14 @@ class Track
         return $this;
     }
 
-    public function getSort(): ?int
+    public function getFileName()
     {
-        return $this->sort;
+        return $this->fileName;
     }
 
-    public function setSort(int $sort): self
+    public function setFileName($fileName): void
     {
-        $this->sort = $sort;
-
-        return $this;
+        $this->fileName = $fileName;
     }
 
     public function getCreatedAt(): ?DateTimeImmutable
