@@ -5,17 +5,15 @@ declare(strict_types=1);
 namespace App\Admin;
 
 use App\Entity\Track;
+use App\Entity\TrackSort;
 use DateTimeImmutable;
-use Doctrine\ORM\EntityRepository;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
+use Sonata\AdminBundle\Admin\AdminInterface;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Form\FormMapper;
-use Sonata\AdminBundle\Form\Type\ModelListType;
+use Sonata\AdminBundle\Form\Type\ModelAutocompleteType;
 use Sonata\AdminBundle\Show\ShowMapper;
-use Sonata\Form\Type\CollectionType;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 final class PlayListAdmin extends AbstractAdmin
@@ -30,29 +28,32 @@ final class PlayListAdmin extends AbstractAdmin
         $form
             ->add('title', TextType::class)
             ->add(
-                'tracks', EntityType::class, [
+                'trackSorts', ModelAutocompleteType::class, [
                     'class' => Track::class,
-                    'query_builder' => function (EntityRepository $er) {
-                        return $er->createQueryBuilder('t')
-                            ->orderBy('t.title', 'ASC');
-                    },
-                    'choice_label' => 'title',
+                    'template' => 'Form/Type/sonata_type_model_autocomplete.html.twig',
+                    'btn_add' => false,
+                    'property' => 'title',
                     'multiple' => true,
+                    'callback' => static function (AdminInterface $admin, string $property, $searchText): void {
+                        $datagrid = $admin->getDatagrid();
+                        $query = $datagrid->getQuery();
+
+                        $query->resetDQLPart('select');
+                        $query->resetDQLPart('from');
+
+                        $query->select('p')
+                            ->from(Track::class, 'p')
+                            ->where('p.title LIKE :title')
+                            ->setParameter('title', '%' . $searchText . '%')
+                        ;
+                    },
                 ]
             )
-//            ->add(
-//                'tracks',
-//                CollectionType::class, [
-//                    'by_reference' => false,
-//                ],
-//                [
-//                    'edit' => 'disable',
-//                    'inline' => 'table',
-//                    'sortable' => 'position',
-//                    'limit' => 3,
-//                ]
-//            )
         ;
+
+        $form
+            ->get('trackSorts')
+            ->addModelTransformer(new TrackSortDataTransformer($this->getSubject(), $this->getModelManager()));
     }
 
     protected function configureDatagridFilters(DatagridMapper $filter): void

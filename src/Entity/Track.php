@@ -3,15 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\TrackRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use DateTimeImmutable;
 
 /**
  * @ORM\Entity(repositoryClass=TrackRepository::class)
- * @ORM\Table(name="track",
- *     indexes={
- *          @ORM\Index(name="idx_play_list_id", columns={"play_list_id"})
- *     }
+ * @ORM\Table(name="track"
  * )
  */
 class Track
@@ -29,14 +28,14 @@ class Track
     private $title;
 
     /**
-     * @ORM\Column(type="smallint")
+     * @ORM\Column(type="string", length=255)
      */
-    private $sort;
+    private $fileName;
 
     /**
-     * @ORM\ManyToOne(targetEntity=PlayList::class, inversedBy="tracks")
+     * @ORM\OneToMany(targetEntity=TrackSort::class, mappedBy="track", cascade={"persist"})
      */
-    private $playList;
+    private $trackSorts;
 
     /**
      * @ORM\Column(type="datetime_immutable")
@@ -47,6 +46,11 @@ class Track
      * @ORM\Column(type="datetime_immutable", nullable=true)
      */
     private $updatedAt;
+
+    public function __construct()
+    {
+        $this->trackSorts = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -65,28 +69,14 @@ class Track
         return $this;
     }
 
-    public function getSort(): ?int
+    public function getFileName()
     {
-        return $this->sort;
+        return $this->fileName;
     }
 
-    public function setSort(int $sort): self
+    public function setFileName($fileName): void
     {
-        $this->sort = $sort;
-
-        return $this;
-    }
-
-    public function getPlayList(): ?PlayList
-    {
-        return $this->playList;
-    }
-
-    public function setPlayList(?PlayList $playList): self
-    {
-        $this->playList = $playList;
-
-        return $this;
+        $this->fileName = $fileName;
     }
 
     public function getCreatedAt(): ?DateTimeImmutable
@@ -111,5 +101,45 @@ class Track
         $this->updatedAt = $updatedAt;
 
         return $this;
+    }
+
+    /**
+     * @return Collection|TrackSort[]
+     */
+    public function getTrackSorts(): Collection
+    {
+        return $this->trackSorts;
+    }
+
+    public function setTrackSorts(ArrayCollection $trackSorts): void
+    {
+        $this->trackSorts = $trackSorts;
+    }
+
+//    public function addTrackSort(TrackSort $trackSort): self
+//    {
+//        if (!$this->trackSorts->contains($trackSort)) {
+//            $this->trackSorts[] = $trackSort;
+//            $trackSort->setTrack($this);
+//        }
+//
+//        return $this;
+//    }
+//
+//    public function removeTrackSort(TrackSort $trackSort): self
+//    {
+//        if ($this->trackSorts->removeElement($trackSort)) {
+//            // set the owning side to null (unless already changed)
+//            if ($trackSort->getTrack() === $this) {
+//                $trackSort->setTrack(null);
+//            }
+//        }
+//
+//        return $this;
+//    }
+
+    public function __toString(): string
+    {
+        return $this->getTitle();
     }
 }

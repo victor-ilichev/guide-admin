@@ -1,0 +1,2 @@
+parameters:
+    local_file_upload_path: '%kernel.project_dir%/public/upload-files/track'

@@ -1,10 +1,12 @@
 .idea
 ###> symfony/framework-bundle ###
+config/packages/parameters.yml.dist
 /.env.local
 /.env.local.php
 /.env.*.local
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
+/public/upload-files/
 /var/
 /vendor/
 ###< symfony/framework-bundle ###

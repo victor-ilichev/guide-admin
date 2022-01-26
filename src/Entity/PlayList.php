@@ -36,9 +36,9 @@ class PlayList
     private $chapter;
 
     /**
-     * @ORM\OneToMany(targetEntity=Track::class, mappedBy="playList", cascade={"persist"})
+     * @ORM\OneToMany(targetEntity=TrackSort::class, mappedBy="playList", orphanRemoval="true", cascade={"persist"})
      */
-    private $tracks;
+    private $trackSorts;
 
     /**
      * @ORM\Column(type="datetime_immutable")
@@ -52,7 +52,7 @@ class PlayList
 
     public function __construct()
     {
-        $this->tracks = new ArrayCollection();
+        $this->trackSorts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -85,29 +85,41 @@ class PlayList
     }
 
     /**
-     * @return Collection|Track[]
+     * @return Collection|TrackSort[]
      */
-    public function getTracks(): Collection
+    public function getTrackSorts(): Collection
     {
-        return $this->tracks;
+        return $this->trackSorts;
     }
 
-    public function addTrack(Track $track): self
+    /**
+     * @param ArrayCollection $trackSorts
+     */
+    public function setTrackSorts(ArrayCollection $trackSorts): void
     {
-        if (!$this->tracks->contains($track)) {
-            $this->tracks[] = $track;
-            $track->setPlayList($this);
+        $this->trackSorts = new ArrayCollection;
+
+        foreach ($trackSorts as $ts) {
+            $this->addTrackSort($ts);
+        }
+    }
+
+    public function addTrackSort(TrackSort $trackSort): self
+    {
+        if (!$this->trackSorts->contains($trackSort)) {
+            $this->trackSorts[] = $trackSort;
+            $trackSort->setPlayList($this);
         }
 
         return $this;
     }
 
-    public function removeTrack(Track $track): self
+    public function removeTrackSort(TrackSort $trackSort): self
     {
-        if ($this->tracks->removeElement($track)) {
+        if ($this->trackSorts->removeElement($trackSort)) {
             // set the owning side to null (unless already changed)
-            if ($track->getPlayList() === $this) {
-                $track->setPlayList(null);
+            if ($trackSort->getPlayList() === $this) {
+                $trackSort->setPlayList(null);
             }
         }
 
@@ -136,5 +148,10 @@ class PlayList
         $this->updatedAt = $updatedAt;
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return 'PlayList [' . $this->getTitle() . ']';
     }
 }

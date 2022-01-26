@@ -4,30 +4,67 @@ declare(strict_types=1);
 
 namespace App\Admin;
 
-use App\Entity\Excursion;
 use App\Entity\Track;
+use App\Service\FileManager\Exception\UploadException;
+use App\Service\FileManager\FileManager;
+use DateTimeImmutable;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
-use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
+use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Show\ShowMapper;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use DateTimeImmutable;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Validator\Constraints;
 
 final class TrackAdmin extends AbstractAdmin
 {
+    /**
+     * @var FileManager
+     */
+    private $fileManager;
+
     protected function prePersist(object $object): void
     {
         $object->setCreatedAt(new DateTimeImmutable);
+        $this->manageFileUpload($object, $this->getForm()->get('file')->getData());
+    }
+
+    public function preUpdate(object $object): void
+    {
+        $this->manageFileUpload($object, $this->getForm()->get('file')->getData());
+    }
+
+    private function manageFileUpload(Track $track, ?UploadedFile $uploadedFile): void
+    {
+        if ($uploadedFile) {
+            try {
+                $filePath = $this->fileManager->upload($uploadedFile);
+                $track->setFileName($filePath);
+            } catch (UploadException $exception) {
+                throw $exception;
+            }
+        }
     }
 
     protected function configureFormFields(FormMapper $form): void
     {
         $form
             ->add('title', TextType::class)
-            ->add('sort', NumberType::class)
+            ->add('file', FileType::class, [
+                'mapped' => false,
+                'required' => true,
+                'constraints' => [
+                    new Constraints\File([
+                        'maxSize' => '33m',
+                        'mimeTypes' => [
+                            'audio/mpeg',
+                        ],
+                        'mimeTypesMessage' => 'Please upload a valid png|jpeg file',
+                    ])
+                ],
+            ])
 //            ->add('excursion', EntityType::class, [
 //                'class' => Excursion::class,
 //                'choice_label' => 'title',
@@ -44,7 +81,6 @@ final class TrackAdmin extends AbstractAdmin
     {
         $list
             ->addIdentifier('title')
-            ->add('sort')
             ->add('_action', 'actions', [
                 'actions' => [
                     'edit' => [],
@@ -57,6 +93,11 @@ final class TrackAdmin extends AbstractAdmin
     protected function configureShowFields(ShowMapper $show): void
     {
         $show->add('title');
+    }
+
+    public function setFileManager(FileManager $fileManager): void
+    {
+        $this->fileManager = $fileManager;
     }
 }
 //создаем свой тип поля для админки
