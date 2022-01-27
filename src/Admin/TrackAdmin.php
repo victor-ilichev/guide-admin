@@ -54,7 +54,7 @@ final class TrackAdmin extends AbstractAdmin
             ->add('title', TextType::class)
             ->add('file', FileType::class, [
                 'mapped' => false,
-                'required' => true,
+                'required' => false,
                 'constraints' => [
                     new Constraints\File([
                         'maxSize' => '33m',

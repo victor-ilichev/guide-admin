@@ -4,7 +4,10 @@ namespace App\Repository;
 
 use App\Entity\Excursion;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
+use Knp\Component\Pager\Pagination\PaginationInterface;
+use Knp\Component\Pager\PaginatorInterface;
 
 /**
  * @method Excursion|null find($id, $lockMode = null, $lockVersion = null)
@@ -14,9 +17,41 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ExcursionRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
-    {
+    /**
+     * @var PaginatorInterface
+     */
+    private $paginator;
+
+    public function __construct(
+        ManagerRegistry $registry,
+        PaginatorInterface $paginator
+    ) {
         parent::__construct($registry, Excursion::class);
+
+        $this->paginator = $paginator;
+    }
+
+    public function findAllWithPagination(int $page, int $limit): PaginationInterface
+    {
+        return
+            $this->paginator->paginate(
+                $this->createPaginationQuery(),
+                $page,
+                $limit,
+                [
+                    'defaultSortFieldName' => 'p.createdAt',
+                    'defaultSortDirection' => 'asc'
+                ]
+            );
+    }
+
+    private function createPaginationQuery(): Query
+    {
+        return
+            $this->createQueryBuilder('p')
+                ->addOrderBy('p.id', 'ASC')
+                ->getQuery()
+            ;
     }
 
     // /**
@@ -47,4 +82,41 @@ class ExcursionRepository extends ServiceEntityRepository
         ;
     }
     */
+    public function findAllWithTrack()
+    {
+        $this
+            ->createQueryBuilder('e')
+//            ->leftJoin('e.sorts', 'es', Query\Expr\Join::WITH, 'es.locale = :locale')
+            ->leftJoin('e.sorts', 'es')
+//            ->where('translations.title = :title')
+//            ->setParameter('locale', $locale)
+//            ->setParameter('title', $title)
+            ->getQuery()
+            ->getResult()
+            ;
+    }
+
+    public function findWithTracks(int $excursionId)
+    {
+        return
+            $this
+                ->createQueryBuilder('e')
+    //            ->leftJoin('e.sorts', 'es', Query\Expr\Join::WITH, 'es.locale = :locale')
+                ->leftJoin(
+                    'e.sorts',
+                    'es'//,
+    //                Query\Expr\Join::WITH,
+    //                'es.excursion = :excursionId'
+                )
+                ->leftJoin('es.chapter', 'ch')
+                ->leftJoin('ch.playListSorts', 'pls')
+                ->leftJoin('pls.playList', 'pl')
+                ->leftJoin('pl.trackSorts', 'trs')
+                ->leftJoin('trs.track', 'tr')
+                ->where('e.id = :excursionId')
+                ->setParameter('excursionId', $excursionId)
+                ->getQuery()
+                ->getResult()
+            ;
+    }
 }
