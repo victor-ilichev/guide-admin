@@ -100,7 +100,7 @@ class Chapter
     }
 
     /**
-     * @return Collection|ExcursionChapterSort[]
+     * @return Collection|ChapterPlayListSort[]
      */
     public function getPlayListSorts(): Collection
     {

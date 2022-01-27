@@ -33,3 +33,4 @@ services:
             - '%local_file_upload_path%'
 
     App\Service\FileManager\FileManager: '@app.service.local_file_manager'
+    App\Presenter\Presenter: '@App\ApiV1\Excursion\Presenter\ExcursionPresenter'

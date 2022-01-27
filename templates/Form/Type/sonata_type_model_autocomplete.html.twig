@@ -70,7 +70,16 @@
                 };
 
                 ball.onmousedown = function(e) {
+
+                    let target = e.target;
+
+                    if (target.className.split(' ').indexOf('select2-selection__choice__remove') >= 0) {
+                        return;
+                    }
+
                     console.log('onmousedown');
+                    console.log(target.className);
+
                     const coords = getCoords(ball);
                     const shiftX = e.pageX - coords.left;
                     const shiftY = e.pageY - coords.top;
